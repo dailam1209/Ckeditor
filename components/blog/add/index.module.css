@@ -1,0 +1,35 @@
+.form {
+    display: flex;
+    flex-direction: column;
+    width: 80%;
+    gap: 20px;
+}
+
+.btns_add {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+.input {
+    display: flex;
+}
+
+p {
+    white-space: nowrap;
+    white-space: nowrap;
+    width: 50%;
+    align-items: center;
+    text-align: flex-end;
+    margin-right: 10px;
+    display: flex;
+}
+
+button {
+    width: 30%;
+    cursor: pointer;
+
+}
+
+
+

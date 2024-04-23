@@ -1,0 +1,47 @@
+.form {
+  display: flex;
+  flex-direction: column;
+  width: 60%;
+  gap: 20px;
+}
+
+.input {
+  display: flex;
+}
+.input p {
+  white-space: nowrap;
+  white-space: nowrap;
+  width: 50%;
+  align-items: center;
+  text-align: flex-end;
+  margin-right: 10px;
+  display: flex;
+}
+
+
+/* span {
+  color: red;
+  margin-right: 4px;
+} */
+
+.btns_add {
+  display: flex;
+  justify-content: center;
+  gap: 30px;
+}
+
+/* button {
+  width: 30%;
+  cursor: pointer;
+  width: fit-content;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+} */
+
+.update {
+  color: #ffff;
+  background: rgb(121, 197, 235);
+}
