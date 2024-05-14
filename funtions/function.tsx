@@ -1,7 +1,7 @@
 import axios from "axios";
 export const getValueLocalStorage = (name: string) => {
     if( typeof window !== 'undefined') {
-        const value = window.localStorage.getItem(name)
+        const value = localStorage.getItem(name)
         return value
     }
     return null
@@ -36,7 +36,7 @@ export const createLinkTilte = (input: string) => {
 export const getAllCandidate = async (obj: any, token?: any, type?: string) => {
     try {
         const res = await axios.post(
-            `https://timviechay.vn/api/work247/admin/list`,
+            `${process.env.NEXT_PUBLIC_BASE_URL_API_ADMIN}/admin/list`,
             obj,
             {
                 headers: {

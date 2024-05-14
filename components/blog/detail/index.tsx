@@ -3,9 +3,11 @@ import { Input_textarea } from "../../InputEdit";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { createLinkTilte, getValueLocalStorage } from "@/funtions/function";
 import s from "@/components/blog/add/style.module.css";
-import { Input, Radio, Select } from "antd";
+import { Button, Input, Radio, Select } from "antd";
 import axios from "axios";
 import { usePathname, useRouter, useParams } from 'next/navigation'
+import Cookies from "js-cookie";
+import Link from "next/link";
 const { TextArea } = Input;
 
 type LoginFormInputs = {
@@ -40,6 +42,7 @@ const AdminBlogDetail = () => {
   const [dataEditOne, setDataEditOne] = useState<any>();
   const [dataEditTwo, setDataEditTwo] = useState<any>();
   const [picture, setPicture] = useState<any>("");
+  const [ apiPicture, setApiPicture ] = useState<string>();
   const [flowAfterUpdate, setFlowAfterUpdate] = useState<number>(0);
   const [detailBlog, setDetailBlog] = useState<any>(null);
   const [ blogCategory, setBlogCategory ] = useState<any>(null);
@@ -48,14 +51,15 @@ const AdminBlogDetail = () => {
   const [ news, setNews ] = useState<any>(false);
   const [ hot, setHot ] = useState<any>(false);
   const [ titleLength, setTitleLength ] = useState<number>(0);
+  const [ desLength, setDesLength ] = useState<number>(0);
   const [ url, setUrl ] = useState<string>('');
 
 
 
 
-  const getDetailBlog = async () => {
+  const getDetailBlog = async (token: string) => {
     const res = await axios.post(
-      `${process.env.NEXT_PUBLIC_BASE_URL_API}/admin/detailBlog`,
+      `${process.env.NEXT_PUBLIC_BASE_URL_API_ADMIN}/admin/detailBlog`,
       {
         new_id: pathName.split('/')[2]
       },
@@ -72,7 +76,9 @@ const AdminBlogDetail = () => {
       setActive(res.data.data.data.new_active  == 1 ? true : false);
       setNews(res.data.data.data.new_new  == 1 ? true : false);
       setHot(res.data.data.data.new_hot  == 1 ? true : false)
+      setPicture(res.data.data.data?.new_picture)
       setFlowAfterUpdate(1);
+      setDesLength(res.data.data.data.new_des.length)
     }
   };
 
@@ -96,15 +102,15 @@ const AdminBlogDetail = () => {
     formData.append("new_hot",hot ? '1' : '0');
     formData.append("new_description", dataEditTwo ? dataEditTwo : detailBlog.new_description);
 
-    if (picture) {
-      formData.append("new_picture", picture);
+    if (apiPicture) {
+      formData.append("new_picture", apiPicture);
     }
 
     const newDataPost = formData;
     try {
       formData.append("new_id", detailBlog.new_id);
       const post = await axios.post(
-        "https://timviechay.vn/api/work247/admin/UpdateBlog",
+        `${process.env.NEXT_PUBLIC_BASE_URL_API_ADMIN}/admin/UpdateBlog`,
         newDataPost,
         {
           headers: {
@@ -152,9 +158,9 @@ const AdminBlogDetail = () => {
     setValue("new_description", detailBlog?.usc_company_info?.trim());
   };
 
-  const getAllBlogCate = async () => {
+  const getAllBlogCate = async (token: string) => {
     try {
-      const post  = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL_API}/admin/allBlogCate`, {},  {
+      const post  = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL_API_ADMIN}/admin/allBlogCate`, {},  {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
@@ -162,26 +168,46 @@ const AdminBlogDetail = () => {
       })
       if(post?.data.data.result) {
         setBlogCategory(post.data.data.data)
-       
       }
     } catch (err) {
       
     }
-  }
+  };
+
+  const handleFileChange = (e: any) => {
+    const file = e.target.files[0];
+    setApiPicture(file);
+
+    if (file) {
+      const reader = new FileReader();
+
+      reader.onloadend = () => {
+        setPicture(reader.result);
+      };
+
+      reader.readAsDataURL(file);
+    }
+  };
 
   useEffect(() => {
-    getAllBlogCate();
-    const newtoken = getValueLocalStorage('work247_token_admin_blog');
+    const newtoken = Cookies.get('work247_token_admin_blog');
     if(pathName.split('/')[2] && newtoken) {
-        setToken(newtoken)
-        getDetailBlog()
+      setToken(newtoken)
+      getAllBlogCate(newtoken);
+      getDetailBlog(newtoken)
     }
-  }, [pathName, token]);
+  }, []);
 
   return (
     <div>
-      {" "}
-
+      <Button onClick={() => router.push('/blog')} style={{
+        margin: '30px',
+        position:'absolute',
+        color: '#fff',
+        background:' #1677ff',
+      }}>
+        Trở lại
+      </Button>
       {
         detailBlog  && blogCategory &&
        <div
@@ -202,7 +228,7 @@ const AdminBlogDetail = () => {
               name="new_category_id"
               control={control}
               defaultValue={
-                Number(detailBlog?.lang_id)
+                Number(detailBlog?.new_category_id)
                }
               rules={{
                 required: "Vui lòng nhập email công ty"
@@ -216,7 +242,7 @@ const AdminBlogDetail = () => {
                     {...field}
                     className={``}
                     defaultValue={
-                        Number(detailBlog?.lang_id)
+                        Number(detailBlog?.new_category_id)
                        }
                     placeholder="Please select"
                     onChange={(selectedOptions) => {
@@ -291,7 +317,7 @@ const AdminBlogDetail = () => {
                 </div>
               )}
             />
-            <Controller
+             <Controller
               name="new_picture"
               control={control}
               render={({ field }) => (
@@ -305,22 +331,37 @@ const AdminBlogDetail = () => {
                   >
                     Ảnh minh họa :
                   </p>
-                  <input
-                    style={{
-                      width: "100%",
-                      border: "1px solid #d9d9d9",
-                      padding: "8px",
-                      borderRadius: "6px",
-                      display: "flex",
-                      justifyContent: "flex-start"
-                    }}
-                    type="file"
-                    placeholder={picture ? picture : detailBlog?.new_picture}
-                    onChange={(e: any) => {
-                      setPicture(e.target.files[0]);
-                      field.onChange(e);
-                    }}
-                  />
+                  <div style={{
+                        width: "100%",
+                        display: "flex",
+                        flexDirection: "row",
+                        gap: "20px",
+                        alignItems: "flex-start",
+                  }}>
+                    
+                    <input
+                      style={{
+                        width: "50%",
+                        border: "1px solid #d9d9d9",
+                        padding: "8px",
+                        borderRadius: "6px",
+                        display: "flex",
+                        justifyContent: "flex-start",
+                        outline: 'none'
+                      }}
+                      type="file"
+                      placeholder={picture ? picture : ''}
+                      onChange={(e: any) => {
+                        setPicture(e.target.files[0]);
+                        handleFileChange(e)
+                        field.onChange(e);
+                      }}
+                    />
+                    <img style={{
+                        width: '100px',
+                        height: '100px'
+                      }} src={`${picture}`} alt="" />
+                  </div>
                 </div>
               )}
             />
@@ -349,9 +390,16 @@ const AdminBlogDetail = () => {
               render={({ field }) => (
                 <div className={s.input}>
                   <p>
-                    <span></span>Description (0/250 ký tự) :
+                    <span></span>Description ({desLength}/250 ký tự) :
                   </p>
-                  <TextArea placeholder="" {...field} />
+                  <TextArea style={{
+                    height: '100px'
+                  }} placeholder="" {...field}  onChange={(e) => {
+                    const length = e.target.value.length;
+                    if (length <= 250) {
+                      setDesLength(length)}
+                      field.onChange(e); 
+                    }}/>
                 </div>
               )}
             />

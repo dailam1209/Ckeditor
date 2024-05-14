@@ -7,6 +7,7 @@ import axios from "axios";
 import { Input_textarea } from "../../InputEdit";
 import { createLinkTilte, getValueLocalStorage} from "@/funtions/function";
 import { usePathname, useRouter, useParams } from 'next/navigation'
+import Cookies from "js-cookie";
 const { TextArea } = Input;
 
 type LoginFormInputs = {
@@ -78,7 +79,7 @@ const AdminBlogAdd = () => {
 
     try {
       const post = await axios.post(
-        "https://timviechay.vn/api/work247/admin/CreateBlog",
+        `${process.env.NEXT_PUBLIC_BASE_URL_API_ADMIN}/admin/CreateBlog`,
         newDataPost,
         {
           headers: {
@@ -104,10 +105,9 @@ const AdminBlogAdd = () => {
   };
 
 
-  const getAllBlogCate = async () => {
-    const token = getValueLocalStorage('work247_token_admin_blog')
+  const getAllBlogCate = async (token: string) => {
     try {
-      const post  = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL_API}/admin/allBlogCate`, {},  {
+      const post  = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL_API_ADMIN}/admin/allBlogCate`, {},  {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
@@ -162,13 +162,13 @@ const AdminBlogAdd = () => {
   };
 
   useEffect(() => {
-    const newtoken = getValueLocalStorage('work247_token_admin_blog');
+    const newtoken = Cookies.get('work247_token_admin_blog');
     if(newtoken) {
       setToken(newtoken)
-      getAllBlogCate();
+      getAllBlogCate(newtoken);
       setDetailBlog([]);
     }
-  }, []);
+  }, [token]);
 
   return (
     <div style={{
@@ -186,8 +186,8 @@ const AdminBlogAdd = () => {
         }}
       >
         <span>Những trường có dấu (*) là bắt buộc phải nhập.</span>
-
-        {detailBlog && (
+        {
+          blogCategory.length > 0 &&
           <form className={s.form} onSubmit={handleSubmit(onSubmit)}>
             <Controller
               name="new_category_id"
@@ -243,7 +243,7 @@ const AdminBlogAdd = () => {
             <Controller
               name="new_title_rewrite"
               control={control}
-              defaultValue={detailBlog?.new_title_rewrite}
+              defaultValue=""
               render={({ field }) => (
                 <div className={s.input}>
                  <p><span>*</span>URL :</p>
@@ -265,11 +265,7 @@ const AdminBlogAdd = () => {
             <Controller
               name="new_order"
               control={control}
-              defaultValue={
-                Number(detailBlog?.new_order)
-                  ? Number(detailBlog?.new_order)
-                  : 0
-              }
+              defaultValue={0}
               render={({ field }) => (
                 <div className={s.input}>
                   <p className={style.input_form}>Thứ tự :</p>
@@ -280,7 +276,7 @@ const AdminBlogAdd = () => {
             <Controller
               name="new_picture"
               control={control}
-              defaultValue={detailBlog?.new_picture}
+              defaultValue=""
               render={({ field }) => (
                 <div style={{
                   display: 'flex'
@@ -336,7 +332,7 @@ const AdminBlogAdd = () => {
             <Controller
               name="new_tt"
               control={control}
-              defaultValue={detailBlog.new_tt}
+              defaultValue=''
               render={({ field }) => (
                 <div className={s.input}>
                   <p><span>*</span>Title ((60-70 ký tự) {titleLength}/70 ký tự) :</p>
@@ -357,7 +353,7 @@ const AdminBlogAdd = () => {
               rules={{
                 required: true
               }}
-              defaultValue={detailBlog?.new_des}
+              defaultValue=""
               render={({ field }) => (
                 <div className={s.input}>
                   <p className={style.input_form}>
@@ -377,7 +373,7 @@ const AdminBlogAdd = () => {
             <Controller
               name="new_keyword"
               control={control}
-              defaultValue={detailBlog?.new_keyword}
+              defaultValue=""
               render={({ field }) => (
                 <div className={s.input}>
                   <p className={style.input_form}>Keywords :</p>
@@ -402,7 +398,7 @@ const AdminBlogAdd = () => {
 
             <Controller
               name="key_lq"
-              defaultValue={detailBlog?.key_lq}
+              defaultValue=""
               control={control}
               render={({ field }) => (
                 <div className={s.input}>
@@ -415,7 +411,7 @@ const AdminBlogAdd = () => {
             <Controller
               name="new_teaser"
               control={control}
-              defaultValue={detailBlog?.new_teaser}
+              defaultValue=""
               render={({ field }) => (
                 <div
                   className={s.input}
@@ -506,7 +502,7 @@ const AdminBlogAdd = () => {
             <Controller
               name="new_description"
               control={control}
-              defaultValue={detailBlog?.new_description}
+              defaultValue=""
               render={({ field }) => (
                 <div
                   className={s.input}
@@ -531,28 +527,6 @@ const AdminBlogAdd = () => {
                 </div>
               )}
             />
-            
-            {/* <div
-              style={{
-                display: "flex"
-              }}
-            >
-              <p
-                style={{
-                  marginRight: "20px"
-                }}
-              >
-                Sau khi lÆ°u dá»¯ liá»‡u :
-              </p>
-              <Radio.Group
-                defaultValue={flowAfterUpdate}
-                onChange={(e) => setFlowAfterUpdate(e.target.value)}
-              >
-                <Radio value={0}>ThÃªm má»›i </Radio>
-                <Radio value={1}>Quay vá» danh sÃ¡ch</Radio>
-                <Radio value={2}>Sá»­a báº£n ghi</Radio>
-              </Radio.Group>
-            </div> */}
             <div className={s.btns_add}>
               <button type="submit" className={`${s.update}`}>
                 Cập nhật
@@ -567,7 +541,7 @@ const AdminBlogAdd = () => {
               </button>
             </div>
           </form>
-        )}
+        }
       </div>
     </div>
   );

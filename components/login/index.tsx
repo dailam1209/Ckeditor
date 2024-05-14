@@ -4,6 +4,8 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import { getValueLocalStorage } from '@/funtions/function';
 import { useEffect, useState } from 'react';
+import { cookies } from 'next/headers'
+import { setMultipleCookie } from '../service';
 
 type LoginFormInputs = {
     username: string;
@@ -15,25 +17,14 @@ const LoginPage = () => {
     const [ token, setToken ] = useState<any>();
     const { control, handleSubmit, formState: { errors } } = useForm<LoginFormInputs>();
     const loginWithAdmin = async (data: any) => {
-        const res: any = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL_API}/admin/login`,{
+        const res: any = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL_API_ADMIN}/admin/login`,{
             "username": data?.username,
             "password": data?.password
         })
         if(res?.data.data.result) {
             const newData = res.data.data.data;
-            localStorage.setItem('work247_token_admin_blog', newData.Token);
-            localStorage.setItem('id_admin_blog', newData.data?.adm_id);
-            localStorage.setItem('auth_admin_blog', 'admin');
-            localStorage.setItem('work247_type_admin_blog', newData.data?.type);
-            localStorage.setItem('phone_admin_blog', newData.data.adm_phone);
-            localStorage.setItem('userName_admin_blog', newData.data.adm_name);
-            
-            if(newData.RefreshToken) {
-                localStorage.setItem('rf_token_admin_blo', newData.RefreshToken);
-            }
-            localStorage.setItem('isLogin_admin_blog', 'true');
-            localStorage.setItem('email_admin_blog', newData.data.adm_email);
-            router.push('/');
+            setMultipleCookie(newData.Token, newData.data.adm_email, newData.data?.adm_id, 'admin', newData.data?.type, newData.data.adm_name, newData.data.adm_phone, newData.RefreshToken)
+            router.push('/blog');
         }
     };
 
@@ -95,3 +86,7 @@ const LoginPage = () => {
 };
 
 export default LoginPage;
+
+function setCookie(arg0: string, Token: any, arg2: number) {
+    throw new Error('Function not implemented.');
+}

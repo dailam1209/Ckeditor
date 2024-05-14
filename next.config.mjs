@@ -18,6 +18,9 @@ const nextConfig = {
             
         ],
     },
+    flags: {
+        DEV_SSR: false,
+      },
     experimental: {
         appDir: true
     }

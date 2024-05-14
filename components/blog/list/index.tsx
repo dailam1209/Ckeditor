@@ -3,6 +3,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Link from "next/link";
 import { useRouter } from 'next/navigation';
+import Cookies from "js-cookie";
 import {
     Button,
   Checkbox,
@@ -22,7 +23,7 @@ import { getAllCandidate, getValueLocalStorage } from "@/funtions/function";
 import { format } from "date-fns";
 import {  EditOutlined } from "@ant-design/icons";
 import DataTable from "@/components/dataTable";
-
+import { logOut } from "@/components/service";
 
 const AdminBlogList = () => {
     
@@ -41,7 +42,18 @@ const AdminBlogList = () => {
 
   const [dataDetail, setDataDetail] = useState<any>(null);
   const [valueDropFilter, setValueDropFilter] = useState<any>([]);
-  const [ blogCategory, setBlogCategory ] = useState<any>(null);
+  const [ blogCategory, setBlogCategory ] = useState<any>();
+
+  function getTextValue (value: number) {
+    let text = ''
+     blogCategory.map((category: any) => {
+      if(category.cat_id == value) {
+        text =  category.cat_name
+      }
+    });
+    return text
+    
+  }
 
   const columns: ProColumns<any>[] = [
     {
@@ -117,21 +129,21 @@ const AdminBlogList = () => {
         return (
           <>
           {
-            blogCategory &&
-            <Select
-                      className={``}
-                      defaultValue={Number(record.new_category_id)}
-                      onChange={(e) => e = record.new_category_id}
-                      style={{ width: "100%" }}
-                      options={
-                        blogCategory.map((category: any) => (
-                        {
-                          'value': Number(category.cat_id),
-                          'label': category.cat_name
-                        }
-                      ))}
-                      size="middle"
-                    />
+            blogCategory && <div>{getTextValue(record.new_category_id)}</div>
+            // <Select
+            //           className={``}
+            //           defaultValue={Number(record.new_category_id)}
+            //           onChange={(e) => e = record.new_category_id}
+            //           style={{ width: "100%" }}
+            //           options={
+            //             blogCategory.map((category: any) => (
+            //             {
+            //               'value': Number(category.cat_id),
+            //               'label': category.cat_name
+            //             }
+            //           ))}
+            //           size="middle"
+            //         />
           }
           </>
         );
@@ -236,17 +248,16 @@ const AdminBlogList = () => {
     }
   ];
 
-  const getAllBlogCate = async () => {
+  const getAllBlogCate = async (token: string) => {
 
     try {
-      const post  = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL_API}/admin/allBlogCate`, {},  {
+      const post  = await axios.post(`${process.env.NEXT_PUBLIC_BASE_URL_API_ADMIN}/admin/allBlogCate`, {},  {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
         }
       })
       if(post?.data.data.result) {
-        console.log('post.data.data.data', post.data.data.data);
         setBlogCategory(post.data.data.data)
       }
     } catch (err) {
@@ -256,7 +267,7 @@ const AdminBlogList = () => {
 
   const getTotal = (data: any) => {
     axios
-      .post(process.env.NEXT_PUBLIC_BASE_URL_API + "/admin/count", data, {
+      .post(process.env.NEXT_PUBLIC_BASE_URL_API_ADMIN + "/admin/count", data, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json"
@@ -318,12 +329,11 @@ const AdminBlogList = () => {
   };
 
   useEffect(() => {
-    const newtoken = getValueLocalStorage('work247_token_admin_blog');
+    const newtoken = Cookies.get('work247_token_admin_blog');
     if(newtoken) {
         setToken(newtoken)
-        getAllBlogCate();
+        getAllBlogCate(newtoken);
     }
-   
   }, []);
 
 
@@ -396,12 +406,20 @@ const AdminBlogList = () => {
         <div style={{
             position: 'absolute',
             top: '90px',
-            right: '150px',
+            right: '10px',
         }}>
           <Button style={{
             background: '#1677ff',
             color: '#FFF'
         }} onClick={() =>  router.push('add')}>Thêm mới</Button>
+        <Button style={{
+            background: 'red',
+            color: '#FFF',
+            marginLeft: '50px'
+        }} onClick={async () =>  {
+          logOut();
+          router.push("/login")
+        } }>Đăng xuất</Button>
         </div>
     </div>
   );
