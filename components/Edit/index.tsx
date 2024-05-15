@@ -1,4 +1,5 @@
 import { getValueLocalStorage } from "@/funtions/function";
+import Cookies from "js-cookie";
 import React, { useContext, useEffect, useRef, useState } from "react";
 
 interface MyEditorProps {
@@ -44,15 +45,14 @@ function MyEditor({ onChange, editorLoaded, name, value, dataEdit, isAgain, valu
     setLengthData(data.length)
   };
 
-  const token = getValueLocalStorage('work247_token_admin_blog');
-
+  const token = Cookies.get('work247_token_admin_blog');
   const uploadImage = async (file: File) => {
     const formData = new FormData();
     formData.append("new_picture", file);
 
 
     try {
-      const response = await fetch("https://timviechay.vn/api/work247/admin/UploadInnerBlogImg", {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_API_ADMIN}/admin/UploadInnerBlogImg`, {
         method: "POST",
         body: formData,
         headers: {

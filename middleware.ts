@@ -10,6 +10,7 @@ interface JwtPayload {
 export function middleware(request: NextRequest) {
   const currentUser = request.cookies.get(`${process.env.NEXT_PUBLIC_TOKEN}`)?.value;
   const currentTime = Math.floor(Date.now() / 1000);
+  
   if (
     protectedRoutes.includes(request.nextUrl.pathname) &&
     (!currentUser || currentTime > jwtDecode<JwtPayload>(currentUser).exp)
@@ -25,6 +26,13 @@ export function middleware(request: NextRequest) {
     return response;
   }
   if (publicRoutes.includes(request.nextUrl.pathname)) {
-    return NextResponse.next();
+    if( currentUser && currentTime < jwtDecode<JwtPayload>(currentUser).exp) {
+      const response = NextResponse.redirect(new URL("/blog", request.url));
+      return response;
+    } else {
+      return NextResponse.next();
+    }
   } 
+
+  
 }

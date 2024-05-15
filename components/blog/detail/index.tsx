@@ -76,9 +76,10 @@ const AdminBlogDetail = () => {
       setActive(res.data.data.data.new_active  == 1 ? true : false);
       setNews(res.data.data.data.new_new  == 1 ? true : false);
       setHot(res.data.data.data.new_hot  == 1 ? true : false)
-      setPicture(res.data.data.data?.new_picture)
+      setPicture(`http://43.239.223.188:3020/pictures/${res.data.data.data?.new_picture}`)
       setFlowAfterUpdate(1);
       setDesLength(res.data.data.data.new_des.length)
+      setTitleLength(res.data.data.data.new_title.length)
     }
   };
 
@@ -378,6 +379,8 @@ const AdminBlogDetail = () => {
                     if (length <= 70) {
                       setTitleLength(length)
                       field.onChange(e); 
+                    } else {
+                      console.log('e', e);
                     }}}/>
                 </div>
               )}
@@ -397,8 +400,9 @@ const AdminBlogDetail = () => {
                   }} placeholder="" {...field}  onChange={(e) => {
                     const length = e.target.value.length;
                     if (length <= 250) {
-                      setDesLength(length)}
+                      setDesLength(length)
                       field.onChange(e); 
+                    }
                     }}/>
                 </div>
               )}

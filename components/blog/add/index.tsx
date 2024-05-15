@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import s from "./style.module.css";
 import style from './style.module.css'
-import { Input, Radio, Select } from "antd";
+import { Button, Input, Radio, Select } from "antd";
 import axios from "axios";
 import { Input_textarea } from "../../InputEdit";
 import { createLinkTilte, getValueLocalStorage} from "@/funtions/function";
@@ -174,7 +174,14 @@ const AdminBlogAdd = () => {
     <div style={{
       position: 'relative'
     }}>
-      {" "}
+      <Button onClick={() => router.push('/blog')} style={{
+        margin: '30px',
+        position:'absolute',
+        color: '#fff',
+        background:' #1677ff',
+      }}>
+        Trở lại
+      </Button>
       <div
         style={{
           width: "100%",
